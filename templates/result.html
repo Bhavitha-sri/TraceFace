@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>TraceFace Result</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>TraceFace</h1>
+
+    <p class="subtitle">
+        AI Face Matching + Public Web Discovery +
+        Blockchain Verification
+    </p>
+
+
+    {% if not success %}
+
+        <div class="error">
+
+            <h2>✗ Analysis Failed</h2>
+
+            <p>
+                {{ message }}
+            </p>
+
+            {% if web_results_count is defined %}
+
+                <p>
+                    Web results found:
+                    <strong>
+                        {{ web_results_count }}
+                    </strong>
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- FACE DETECTION -->
+
+        <div class="success">
+
+            <h2>✓ Face Detected</h2>
+
+            <p>
+                {{ message }}
+            </p>
+
+            {% if web_results_count is defined %}
+
+                <p>
+                    Public web image results:
+                    <strong>
+                        {{ web_results_count }}
+                    </strong>
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- BEST WEB MATCH -->
+
+        {% if match_found %}
+
+            <div class="match">
+
+                <h2>✓ Public Web Content Matched</h2>
+
+                <p>
+                    <strong>Match ID:</strong>
+                    {{ best_match.id }}
+                </p>
+
+                <p>
+                    <strong>Title:</strong>
+                    {{ best_match.title }}
+                </p>
+
+                <p>
+                    <strong>Source:</strong>
+                    {{ best_match.source }}
+                </p>
+
+                <p>
+                    <strong>Face Similarity:</strong>
+                    {{ "%.2f"|format(
+                        best_match.similarity * 100
+                    ) }}%
+                </p>
+
+                {% if best_match.exact_match %}
+
+                    <p>
+                        <strong>
+                            Image Match Type:
+                        </strong>
+                        Exact web image match
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        <strong>
+                            Image Match Type:
+                        </strong>
+                        Visual web match
+                    </p>
+
+                {% endif %}
+
+                <p>
+                    <strong>Public Page:</strong>
+                </p>
+
+                <p>
+
+                    <a
+                        href="{{ best_match.url }}"
+                        target="_blank">
+
+                        {{ best_match.url }}
+
+                    </a>
+
+                </p>
+
+            </div>
+
+
+            <!-- EVIDENCE -->
+
+            {% if evidence_record %}
+
+                <div class="evidence">
+
+                    <h2>
+                        🔐 Evidence Record
+                    </h2>
+
+
+                    <div class="evidence-row">
+
+                        <strong>Evidence ID:</strong>
+
+                        <span>
+                            {{ evidence_record.evidence.evidence_id }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="evidence-row">
+
+                        <strong>Uploaded File:</strong>
+
+                        <span>
+                            {{ evidence_record.evidence.uploaded_file }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="evidence-row">
+
+                        <strong>Matched Web Page:</strong>
+
+                        <span>
+                            {{ evidence_record.evidence.matched_post_id }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="evidence-row">
+
+                        <strong>Created:</strong>
+
+                        <span>
+                            {{ evidence_record.evidence.created_at }}
+                        </span>
+
+                    </div>
+
+
+                    <h3>
+                        SHA-256 Fingerprint
+                    </h3>
+
+                    <div class="hash-box">
+
+                        {{ evidence_record.sha256 }}
+
+                    </div>
+
+
+                    <!-- BLOCKCHAIN -->
+
+                    <div class="blockchain-section">
+
+                        <h2>
+                            ⛓ Blockchain Verification
+                        </h2>
+
+
+                        <div class="blockchain-row">
+
+                            <strong>Status:</strong>
+
+                            <span>
+                                {{ evidence_record.blockchain.status }}
+                            </span>
+
+                        </div>
+
+
+                        {% if evidence_record.blockchain.transaction_hash %}
+
+                            <div class="blockchain-row">
+
+                                <strong>
+                                    Transaction Hash:
+                                </strong>
+
+                                <span class="hash-box">
+
+                                    {{ evidence_record.blockchain.transaction_hash }}
+
+                                </span>
+
+                            </div>
+
+
+                            <p>
+
+                                <a
+                                    href="https://sepolia.etherscan.io/tx/{{ evidence_record.blockchain.transaction_hash }}"
+                                    target="_blank">
+
+                                    View transaction on Sepolia Etherscan
+
+                                </a>
+
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if evidence_record.blockchain.block_number %}
+
+                            <div class="blockchain-row">
+
+                                <strong>
+                                    Block:
+                                </strong>
+
+                                <span>
+                                    {{ evidence_record.blockchain.block_number }}
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        {% if evidence_record.blockchain.on_chain_sha256 %}
+
+                            <h3>
+                                On-Chain SHA-256
+                            </h3>
+
+                            <div class="hash-box">
+
+                                {{ evidence_record.blockchain.on_chain_sha256 }}
+
+                            </div>
+
+                        {% endif %}
+
+
+                        {% if evidence_record.blockchain.verified %}
+
+                            <div class="verification-success">
+
+                                <h2>
+                                    ✅ VERIFICATION SUCCESS
+                                </h2>
+
+                                <p>
+                                    The SHA-256 fingerprint
+                                    read from the blockchain
+                                    matches the evidence record.
+                                </p>
+
+                            </div>
+
+                        {% elif evidence_record.blockchain.status == "FAILED" %}
+
+                            <div class="verification-failed">
+
+                                <h2>
+                                    ❌ BLOCKCHAIN TRANSACTION FAILED
+                                </h2>
+
+                            </div>
+
+                        {% elif evidence_record.blockchain.status == "VERIFICATION_FAILED" %}
+
+                            <div class="verification-failed">
+
+                                <h2>
+                                    ❌ VERIFICATION FAILED
+                                </h2>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+        {% else %}
+
+            <div class="error">
+
+                <h2>
+                    ✗ No Strong Face Match
+                </h2>
+
+                <p>
+                    Public web images were found, but
+                    none reached the face-matching threshold.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- WEB FACE MATCHES -->
+
+        <h2 class="section-title">
+            Public Web Face Comparisons
+        </h2>
+
+
+        <div class="results">
+
+            {% for match in matches %}
+
+                <div class="candidate">
+
+                    <h3>
+                        {{ loop.index }}.
+                        {{ match.title }}
+                    </h3>
+
+                    <p>
+
+                        <strong>Source:</strong>
+                        {{ match.source }}
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+                            Face Similarity:
+                        </strong>
+
+                        {{ "%.2f"|format(
+                            match.similarity * 100
+                        ) }}%
+
+                    </p>
+
+
+                    {% if match.exact_match %}
+
+                        <p>
+                            Exact image match returned by Lens
+                        </p>
+
+                    {% endif %}
+
+
+                    <p>
+
+                        <a
+                            href="{{ match.url }}"
+                            target="_blank">
+
+                            Open public page
+
+                        </a>
+
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <a href="/"
+       class="back-button">
+
+        Analyze another image
+
+    </a>
+
+</div>
+
+</body>
+
+</html>

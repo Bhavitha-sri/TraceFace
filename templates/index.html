@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TraceFace</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>TraceFace</h1>
+
+        <p class="subtitle">
+            AI-powered public content verification
+        </p>
+
+        <form action="/analyze" method="POST" enctype="multipart/form-data">
+
+            <label for="photo">
+                Select a face image
+            </label>
+
+            <input
+                type="file"
+                id="photo"
+                name="photo"
+                accept="image/*"
+                required
+            >
+
+            <button type="submit">
+                Analyze Face
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+</html>

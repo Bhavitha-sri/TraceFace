@@ -1,0 +1,23 @@
+[
+    {
+        "id": "POST001",
+        "title": "Public Event Photo",
+        "source": "Demo Social Feed",
+        "url": "https://example.com/post/POST001",
+        "image": "candidate1.png"
+    },
+    {
+        "id": "POST002",
+        "title": "College Event",
+        "source": "Demo Social Feed",
+        "url": "https://example.com/post/POST002",
+        "image": "candidate2.png"
+    },
+    {
+        "id": "POST003",
+        "title": "Technology Meetup",
+        "source": "Demo Social Feed",
+        "url": "https://example.com/post/POST003",
+        "image": "candidate3.png"
+    }
+]

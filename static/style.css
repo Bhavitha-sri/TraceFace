@@ -1,0 +1,64 @@
+.evidence {
+    margin-top: 25px;
+    padding: 25px;
+    border-radius: 12px;
+    background: #f3e5f5;
+    border: 1px solid #ce93d8;
+    text-align: left;
+}
+
+.evidence-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.evidence-row span {
+    text-align: right;
+    word-break: break-word;
+}
+
+.blockchain-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.blockchain-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.hash-box {
+    margin-top: 10px;
+    padding: 15px;
+    background: #eeeeee;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 14px;
+    word-break: break-all;
+}
+
+.verification-success {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+}
+
+.verification-failed {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #ffebee;
+    border: 1px solid #e57373;
+}
+
+.candidate {
+    text-align: left;
+}
