@@ -4,6 +4,7 @@ import os
 import json
 import tempfile
 import requests
+from dotenv import load_dotenv
 
 from werkzeug.utils import secure_filename
 
@@ -14,7 +15,11 @@ from blockchain.blockchain import (
     wait_for_confirmation,
     verify_hash
 )
+load_dotenv()
 
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+ETH_PRIVATE_KEY = os.getenv("ETH_PRIVATE_KEY")
+RPC_URL = os.getenv("RPC_URL")
 from web_search import (
     prepare_image,
     upload_image,
