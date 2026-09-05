@@ -21,6 +21,11 @@
     <img src="https://img.shields.io/badge/🚀%20LIVE%20DEMO-Open%20TraceFace-success?style=for-the-badge" />
   </a>
 </p>
+## 🌐 Live Demo
+
+🚀 **Try TraceFace Live:**
+
+👉 [**Open TraceFace**](https://trace-face-dlb9emuv0-bhavitha-sris-projects.vercel.app)
 ## 🌐 What is TraceFace?
 
 **TraceFace** is an AI-powered face matching and public-web discovery system designed to connect multiple technologies into a single verification pipeline.
