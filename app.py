@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request
 import cv2
 import os
@@ -5,7 +6,6 @@ import json
 import tempfile
 import requests
 from dotenv import load_dotenv
-
 from werkzeug.utils import secure_filename
 
 from evidence import create_evidence
@@ -15,17 +15,24 @@ from blockchain.blockchain import (
     wait_for_confirmation,
     verify_hash
 )
-load_dotenv()
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-ETH_PRIVATE_KEY = os.getenv("ETH_PRIVATE_KEY")
-RPC_URL = os.getenv("RPC_URL")
 from web_search import (
     prepare_image,
     upload_image,
     search_google_lens,
     extract_results
 )
+
+
+# ============================================================
+# ENVIRONMENT VARIABLES
+# ============================================================
+
+load_dotenv()
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+ETH_PRIVATE_KEY = os.getenv("ETH_PRIVATE_KEY")
+RPC_URL = os.getenv("RPC_URL")
 
 
 # ============================================================
@@ -40,37 +47,51 @@ BASE_DIR = os.path.dirname(
 
 
 # ============================================================
-# PROJECT PATHS
+# VERCEL RUNTIME PATHS
+# ============================================================
+#
+# IMPORTANT:
+# Vercel's deployed project directory (/var/task) is read-only.
+# Runtime-generated files must be stored in /tmp.
+#
+# BASE_DIR is still used for static project files such as:
+# models/, templates/, static/, etc.
 # ============================================================
 
+RUNTIME_DIR = os.path.join(
+    tempfile.gettempdir(),
+    "traceface"
+)
+
 UPLOAD_FOLDER = os.path.join(
-    BASE_DIR,
+    RUNTIME_DIR,
     "uploads"
 )
 
+DATA_DIR = os.path.join(
+    RUNTIME_DIR,
+    "data"
+)
+
 WEB_RESULTS_FILE = os.path.join(
-    BASE_DIR,
-    "data",
+    DATA_DIR,
     "web_results.json"
 )
 
 EVIDENCE_FILE = os.path.join(
-    BASE_DIR,
-    "data",
+    DATA_DIR,
     "evidence_records.json"
 )
 
 
+# Create writable runtime directories
 os.makedirs(
     UPLOAD_FOLDER,
     exist_ok=True
 )
 
 os.makedirs(
-    os.path.join(
-        BASE_DIR,
-        "data"
-    ),
+    DATA_DIR,
     exist_ok=True
 )
 
@@ -120,9 +141,7 @@ recognizer = cv2.FaceRecognizerSF.create(
 # DETECT ALL FACES IN IMAGE
 # ============================================================
 
-def detect_faces(
-    image
-):
+def detect_faces(image):
 
     if image is None:
         return []
@@ -174,9 +193,7 @@ def create_face_feature(
 # CREATE QUERY FEATURE
 # ============================================================
 
-def create_query_feature(
-    image
-):
+def create_query_feature(image):
 
     faces = detect_faces(
         image
@@ -208,7 +225,8 @@ def create_query_feature(
 
 
 # ============================================================
-# COMPARE QUERY AGAINST ALL FACES IN CANDIDATE IMAGE
+# COMPARE QUERY AGAINST ALL FACES
+# IN CANDIDATE IMAGE
 # ============================================================
 
 def compare_query_with_image(
@@ -221,7 +239,6 @@ def compare_query_with_image(
     )
 
     if not faces:
-
         return None
 
     best_score = None
@@ -262,12 +279,9 @@ def compare_query_with_image(
 # DOWNLOAD WEB IMAGE
 # ============================================================
 
-def download_web_image(
-    image_url
-):
+def download_web_image(image_url):
 
     if not image_url:
-
         return None
 
     try:
@@ -287,9 +301,7 @@ def download_web_image(
         )
 
         if response.status_code != 200:
-
             return None
-
 
         content_type = (
             response.headers
@@ -300,24 +312,20 @@ def download_web_image(
             .lower()
         )
 
-
         # Accept normal image responses
         # but don't reject if server omitted
-        # a Content-Type header.
+        # Content-Type.
         if (
             content_type
             and "image" not in content_type
         ):
-
             return None
-
 
         content = bytearray()
 
         max_download_size = (
             8 * 1024 * 1024
         )
-
 
         for chunk in response.iter_content(
             chunk_size=65536
@@ -336,32 +344,23 @@ def download_web_image(
 
                 return None
 
-
         if not content:
-
             return None
 
+        import numpy as np
 
-        array = __import__(
-            "numpy"
-        ).frombuffer(
+        array = np.frombuffer(
             bytes(content),
-            dtype=__import__(
-                "numpy"
-            ).uint8
+            dtype=np.uint8
         )
-
 
         image = cv2.imdecode(
             array,
             cv2.IMREAD_COLOR
         )
 
-
         if image is None:
-
             return None
-
 
         return image
 
@@ -422,7 +421,10 @@ def perform_web_search(
         )
 
 
+        # ----------------------------------------------------
         # Save complete web-search result
+        # ----------------------------------------------------
+
         web_data = {
 
             "exact_matches":
@@ -493,7 +495,6 @@ def find_web_face_matches(
 
     seen_urls = set()
 
-
     # --------------------------------------------------------
     # Exact matches first
     # --------------------------------------------------------
@@ -524,7 +525,6 @@ def find_web_face_matches(
         if len(candidates) >= max_results:
             break
 
-
         page_url = item.get(
             "link"
         )
@@ -533,24 +533,17 @@ def find_web_face_matches(
             "image"
         )
 
-
         if not page_url:
-
             continue
-
 
         if page_url in seen_urls:
-
             continue
-
 
         seen_urls.add(
             page_url
         )
 
-
         if not image_url:
-
             continue
 
 
@@ -564,9 +557,7 @@ def find_web_face_matches(
             )
         )
 
-
         if candidate_image is None:
-
             continue
 
 
@@ -581,9 +572,7 @@ def find_web_face_matches(
             )
         )
 
-
         if similarity is None:
-
             continue
 
 
@@ -633,7 +622,6 @@ def find_web_face_matches(
         reverse=True
     )
 
-
     return candidates
 
 
@@ -651,7 +639,6 @@ def update_evidence_blockchain(
     ):
 
         return
-
 
     try:
 
@@ -679,7 +666,6 @@ def update_evidence_blockchain(
             "evidence",
             {}
         )
-
 
         if (
             evidence.get(
@@ -779,7 +765,7 @@ def analyze():
 
 
     # --------------------------------------------------------
-    # Save upload
+    # Save upload to /tmp
     # --------------------------------------------------------
 
     uploaded_path = os.path.join(
@@ -935,7 +921,6 @@ def analyze():
     # ========================================================
 
     MATCH_THRESHOLD = 0.363
-
 
     match_found = (
         best_match["similarity"]
